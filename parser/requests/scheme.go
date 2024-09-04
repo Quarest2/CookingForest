@@ -1,4 +1,4 @@
-package storage
+package requests
 
 type Recipe struct {
 	Name     string

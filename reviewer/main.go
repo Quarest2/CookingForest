@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 func main() {
-	IsEnd := false
-	for !IsEnd {
+	isEnd := false
+	for !isEnd {
 		command := GetCommand()
 
 		if command != 0 {
@@ -23,6 +23,6 @@ func main() {
 		}
 
 		command = 0
-		IsEnd = EndOfWork()
+		isEnd = EndOfWork()
 	}
 }
