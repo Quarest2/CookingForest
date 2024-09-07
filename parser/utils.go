@@ -115,6 +115,21 @@ func Holiday() string {
 	}
 }
 
+func NumOfRecipes() int {
+	for {
+		fmt.Println("Enter the number of recipes to download: (integer)")
+
+		var command string
+		_, _ = fmt.Fscan(os.Stdin, &command)
+		if commandInt, err := strconv.Atoi(command); err == nil && commandInt >= 1 {
+			fmt.Println()
+			return commandInt
+		}
+
+		fmt.Println("Unknown command")
+	}
+}
+
 func NewReqStr(time string, mealTime string, holiday string) string {
 	return "https://www.edimdoma.ru/retsepty?" + time + "&" + mealTime + "&" + holiday
 }

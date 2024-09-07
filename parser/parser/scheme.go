@@ -1,4 +1,4 @@
-package requests
+package parser
 
 type Recipe struct {
 	Name     string
