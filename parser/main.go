@@ -16,13 +16,13 @@ func main() {
 		cookingTime := DesiredCookingTime()
 		mealTime := MealTime()
 		holiday := Holiday()
-		// n := NumOfRecipes()
+		n := NumOfRecipes()
 		url := NewReqStr(cookingTime, mealTime, holiday)
 
 		if rBody, err = request.GetBody(url); err != nil {
 			fmt.Println(err)
 		}
-		parser.Parse(rBody)
+		parser.Parse(rBody, n)
 		isEnd = EndOfWork()
 	}
 }

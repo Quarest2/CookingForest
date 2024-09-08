@@ -1,14 +1,18 @@
 package parser
 
 import (
+	"CookingForest/parser/request"
 	"fmt"
 	"golang.org/x/net/html"
 	"io"
+	"io/ioutil"
+	"regexp"
 )
 
-func Parse(bodyStr io.Reader) ([]Recipe, error) {
+func Parse(bodyStr io.Reader, counter int) ([]Recipe, error) {
 	var doc *html.Node
 	var err error
+	var recipes = make([]string, 0)
 
 	if doc, err = html.Parse(bodyStr); err != nil {
 		return nil, err
@@ -19,7 +23,14 @@ func Parse(bodyStr io.Reader) ([]Recipe, error) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
-					fmt.Println(a.Val)
+					var match bool
+					match, err = regexp.MatchString("/retsepty/[1-9]{5}", a.Val)
+					if err == nil && match {
+						match, err = regexp.MatchString("#comments_anchor", a.Val)
+						if err == nil && !match {
+							recipes = append(recipes, a.Val)
+						}
+					}
 					break
 				}
 			}
@@ -29,5 +40,33 @@ func Parse(bodyStr io.Reader) ([]Recipe, error) {
 		}
 	}
 	f(doc)
-	return nil, nil
+
+	recipes = DedupeStrings(recipes)
+	var reader io.Reader
+	var recipe Recipe
+	var result []Recipe
+	if len(recipes) < counter {
+		for _, r := range recipes {
+			if reader, err = request.GetBody("https://www.edimdoma.ru" + r); err == nil {
+				if recipe, err = GetOneRecipe(reader); err == nil {
+					result = append(result, recipe)
+				}
+			}
+		}
+	} else {
+		for i := 0; i < counter; i++ {
+			if reader, err = request.GetBody("https://www.edimdoma.ru" + recipes[i]); err == nil {
+				if recipe, err = GetOneRecipe(reader); err == nil {
+					result = append(result, recipe)
+				}
+			}
+		}
+	}
+	return result, nil
+}
+
+func GetOneRecipe(reader io.Reader) (Recipe, error) {
+	text, _ := ioutil.ReadAll(reader)
+	fmt.Println(string(text))
+	return Recipe{}, nil
 }
