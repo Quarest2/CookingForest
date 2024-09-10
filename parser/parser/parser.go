@@ -2,11 +2,10 @@ package parser
 
 import (
 	"CookingForest/parser/request"
-	"fmt"
 	"golang.org/x/net/html"
 	"io"
-	"io/ioutil"
 	"regexp"
+	"strconv"
 )
 
 func Parse(bodyStr io.Reader, counter int) ([]Recipe, error) {
@@ -66,7 +65,43 @@ func Parse(bodyStr io.Reader, counter int) ([]Recipe, error) {
 }
 
 func GetOneRecipe(reader io.Reader) (Recipe, error) {
-	text, _ := ioutil.ReadAll(reader)
-	fmt.Println(string(text))
-	return Recipe{}, nil
+	var doc *html.Node
+	var err error
+	var recipe Recipe
+
+	if doc, err = html.Parse(reader); err != nil {
+		return Recipe{}, err
+	}
+
+	var strData []string
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "div" {
+			if len(n.Attr) > 0 && n.Attr[0].Val == "entry-stats__value" {
+				secondChild := n.FirstChild.FirstChild
+				strData = append(strData, secondChild.Data)
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(doc)
+
+	var persons int
+	if len(strData) == 2 {
+		if persons, err = strconv.Atoi(strData[1]); err != nil {
+			return Recipe{}, err
+		}
+		recipe = Recipe{Time: strData[0] + " minutes", Persons: persons}
+	}
+	if len(strData) == 3 {
+		if persons, err = strconv.Atoi(strData[2]); err != nil {
+			return Recipe{}, err
+		}
+		recipe = Recipe{Time: strData[1] + " hours", Persons: persons}
+	}
+	return recipe, nil
+
+	// TODO имя, изображение, шаги приготовления
 }
