@@ -1,9 +1,9 @@
 package parser
 
 type Recipe struct {
-	Name    string
-	Image   []byte
-	Time    string
-	Persons int
-	Steps   []string
+	Name      string
+	ImagePath string
+	Time      string
+	Persons   int
+	Steps     []string
 }
