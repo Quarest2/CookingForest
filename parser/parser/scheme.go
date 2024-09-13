@@ -1,9 +1,9 @@
 package parser
 
 type Recipe struct {
-	Name      string
-	ImagePath string
-	Time      string
-	Persons   int
-	Steps     []string
+	Name      string   `json:"name"`
+	ImagePath string   `json:"image_path"`
+	Time      string   `json:"time"`
+	Persons   int      `json:"persons"`
+	Steps     []string `json:"steps"`
 }

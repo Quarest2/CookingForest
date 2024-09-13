@@ -91,7 +91,6 @@ func GetOneRecipe(reader io.Reader) (Recipe, error) {
 			}
 			// Ищем шаги приготовления
 			if len(n.Attr) > 0 && n.Attr[0].Val == "step_hint" {
-				fmt.Println(n.Attr[0].Val)
 				if n.FirstChild != nil {
 					steps = append(steps, n.FirstChild.Data)
 				}
