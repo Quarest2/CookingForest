@@ -12,9 +12,8 @@ import (
 	"strings"
 )
 
-func Parse(bodyStr io.Reader, counter int) ([]Recipe, error) {
+func Parse(bodyStr io.Reader, counter int) (result []Recipe, err error) {
 	var doc *html.Node
-	var err error
 	var recipes = make([]string, 0)
 
 	if doc, err = html.Parse(bodyStr); err != nil {
@@ -47,7 +46,6 @@ func Parse(bodyStr io.Reader, counter int) ([]Recipe, error) {
 	recipes = DedupeStrings(recipes)
 	var reader io.Reader
 	var recipe Recipe
-	var result []Recipe
 	if len(recipes) < counter {
 		for _, r := range recipes {
 			if reader, err = request.GetBody("https://www.edimdoma.ru" + r); err == nil {

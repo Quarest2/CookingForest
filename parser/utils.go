@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 )
 
@@ -11,7 +10,7 @@ func EndOfWork() bool {
 	fmt.Println("If you want to do so, enter 'exit' to exit program")
 
 	var command string
-	if _, _ = fmt.Fscan(os.Stdin, &command); command == "exit" {
+	if _, _ = fmt.Scan(&command); command == "exit" {
 		fmt.Println()
 		return true
 	}
@@ -29,18 +28,18 @@ func DesiredCookingTime() string {
 		fmt.Println("5. Doesn't matter")
 
 		var command string
-		_, _ = fmt.Fscan(os.Stdin, &command)
+		_, _ = fmt.Scan(&command)
 		if commandInt, err := strconv.Atoi(command); err == nil && commandInt >= 1 && commandInt <= 5 {
 			fmt.Println()
 			switch commandInt {
 			case 1:
-				return "durations" + url.QueryEscape("[]") + "=15"
+				return "15"
 			case 2:
-				return "durations" + url.QueryEscape("[]") + "=30"
+				return "30"
 			case 3:
-				return "durations" + url.QueryEscape("[]") + "=45"
+				return "45"
 			case 4:
-				return "durations" + url.QueryEscape("[]") + "=60"
+				return "60"
 			case 5:
 				return ""
 			}
@@ -61,20 +60,20 @@ func MealTime() string {
 		fmt.Println("6. Doesn't matter")
 
 		var command string
-		_, _ = fmt.Fscan(os.Stdin, &command)
+		_, _ = fmt.Scan(&command)
 		if commandInt, err := strconv.Atoi(command); err == nil && commandInt >= 1 && commandInt <= 6 {
 			fmt.Println()
 			switch commandInt {
 			case 1:
-				return url.QueryEscape("tags[recipe_mealtime][]") + "=" + url.QueryEscape("завтрак")
+				return "завтрак"
 			case 2:
-				return url.QueryEscape("tags[recipe_mealtime][]") + "=" + url.QueryEscape("второй+завтрак")
+				return "второй+завтрак"
 			case 3:
-				return url.QueryEscape("tags[recipe_mealtime][]") + "=" + url.QueryEscape("ссобойки")
+				return "ссобойки"
 			case 4:
-				return url.QueryEscape("tags[recipe_mealtime][]") + "=" + url.QueryEscape("полдник")
+				return "полдник"
 			case 5:
-				return url.QueryEscape("tags[recipe_mealtime][]") + "=" + url.QueryEscape("ужин")
+				return "ужин"
 			case 6:
 				return ""
 			}
@@ -94,18 +93,18 @@ func Holiday() string {
 		fmt.Println("5. Doesn't matter")
 
 		var command string
-		_, _ = fmt.Fscan(os.Stdin, &command)
+		_, _ = fmt.Scan(&command)
 		if commandInt, err := strconv.Atoi(command); err == nil && commandInt >= 1 && commandInt <= 5 {
 			fmt.Println()
 			switch commandInt {
 			case 1:
-				return url.QueryEscape("tags[recipe_holiday][]") + "=" + url.QueryEscape("масленица")
+				return "масленица"
 			case 2:
-				return url.QueryEscape("tags[recipe_holiday][]") + "=" + url.QueryEscape("новый+год")
+				return "новый+год"
 			case 3:
-				return url.QueryEscape("tags[recipe_holiday][]") + "=" + url.QueryEscape("пасха")
+				return "пасха"
 			case 4:
-				return url.QueryEscape("tags[recipe_holiday][]") + "=" + url.QueryEscape("пост")
+				return "пост"
 			case 5:
 				return ""
 			}
@@ -120,7 +119,7 @@ func NumOfRecipes() int {
 		fmt.Println("Enter the number of recipes to download: (integer)")
 
 		var command string
-		_, _ = fmt.Fscan(os.Stdin, &command)
+		_, _ = fmt.Scan(&command)
 		if commandInt, err := strconv.Atoi(command); err == nil && commandInt >= 1 {
 			fmt.Println()
 			return commandInt
@@ -131,5 +130,15 @@ func NumOfRecipes() int {
 }
 
 func NewReqStr(time string, mealTime string, holiday string) string {
-	return "https://www.edimdoma.ru/retsepty?" + time + "&" + mealTime + "&" + holiday
+	values := url.Values{}
+	if time != "" {
+		values.Add("durations[]", time)
+	}
+	if mealTime != "" {
+		values.Add("tags[recipe_mealtime][]", mealTime)
+	}
+	if holiday != "" {
+		values.Add("tags[recipe_holiday][]", holiday)
+	}
+	return "https://www.edimdoma.ru/retsepty?" + values.Encode()
 }
