@@ -67,7 +67,7 @@ func MealTime() string {
 			case 1:
 				return "завтрак"
 			case 2:
-				return "второй+завтрак"
+				return "второй завтрак"
 			case 3:
 				return "ссобойки"
 			case 4:
@@ -100,7 +100,7 @@ func Holiday() string {
 			case 1:
 				return "масленица"
 			case 2:
-				return "новый+год"
+				return "новый год"
 			case 3:
 				return "пасха"
 			case 4:

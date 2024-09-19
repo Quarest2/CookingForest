@@ -12,12 +12,15 @@ import (
 	"strings"
 )
 
-func Parse(bodyStr io.Reader, counter int) (result []Recipe, err error) {
-	var doc *html.Node
-	var recipes = make([]string, 0)
+var Page *html.Node
+var NumPage int = 2
 
-	if doc, err = html.Parse(bodyStr); err != nil {
-		return nil, err
+func ParsePage(bodyStr io.Reader, counter int) (result []Recipe, left int, err error) {
+	var recipes = make([]string, 0)
+	left = counter
+
+	if Page, err = html.Parse(bodyStr); err != nil {
+		return
 	}
 
 	var f func(*html.Node)
@@ -41,7 +44,7 @@ func Parse(bodyStr io.Reader, counter int) (result []Recipe, err error) {
 			f(c)
 		}
 	}
-	f(doc)
+	f(Page)
 
 	recipes = DedupeStrings(recipes)
 	var reader io.Reader
@@ -51,6 +54,7 @@ func Parse(bodyStr io.Reader, counter int) (result []Recipe, err error) {
 			if reader, err = request.GetBody("https://www.edimdoma.ru" + r); err == nil {
 				if recipe, err = GetOneRecipe(reader); err == nil {
 					result = append(result, recipe)
+					left--
 				}
 			}
 		}
@@ -59,11 +63,57 @@ func Parse(bodyStr io.Reader, counter int) (result []Recipe, err error) {
 			if reader, err = request.GetBody("https://www.edimdoma.ru" + recipes[i]); err == nil {
 				if recipe, err = GetOneRecipe(reader); err == nil {
 					result = append(result, recipe)
+					left--
 				}
 			}
 		}
 	}
-	return result, nil
+	return
+}
+
+func ParseFirstPage(bodyStr io.Reader, counter int) (result []Recipe, err error) {
+	newRecipes := make([]Recipe, 0)
+	var left int
+	if newRecipes, left, err = ParsePage(bodyStr, counter); err != nil {
+		return
+	}
+	result = append(result, newRecipes...)
+
+	var url = "url"
+	for left > 0 && url != "" {
+		url = ""
+		var f func(*html.Node)
+		f = func(n *html.Node) {
+			if n.Type == html.ElementNode && n.Data == "a" {
+				for _, a := range n.Attr {
+					if a.Key == "href" {
+						var match bool
+						match, err = regexp.MatchString(fmt.Sprintf("&page=%d", NumPage), a.Val)
+						if err == nil && match {
+							url = "https://www.edimdoma.ru" + a.Val
+						}
+						break
+					}
+				}
+			}
+			for c := n.FirstChild; c != nil; c = c.NextSibling {
+				f(c)
+			}
+		}
+		f(Page)
+
+		var rBody io.Reader
+		if rBody, err = request.GetBody(url); err != nil {
+			continue
+		}
+		if newRecipes, left, err = ParsePage(rBody, left); err != nil {
+			break
+		}
+		NumPage++
+		result = append(result, newRecipes...)
+	}
+
+	return
 }
 
 func GetOneRecipe(reader io.Reader) (Recipe, error) {

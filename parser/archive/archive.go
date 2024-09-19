@@ -34,7 +34,7 @@ func CreateArchive(recipes []parser.Recipe) (err error) {
 	var img image.Image
 	for _, recipe := range recipes {
 		if file, err = os.Open(fmt.Sprintf("%s", recipe.ImagePath)); err != nil {
-			return
+			continue
 		}
 		defer file.Close()
 		if img, err = jpeg.Decode(file); err != nil {

@@ -25,7 +25,7 @@ func main() {
 		if rBody, err = request.GetBody(url); err != nil {
 			fmt.Println(err)
 		}
-		if recipes, err = parser.Parse(rBody, n); err != nil {
+		if recipes, err = parser.ParseFirstPage(rBody, n); err != nil {
 			fmt.Println(err)
 		}
 		if err = archive.CreateArchive(recipes); err != nil {
